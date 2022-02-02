@@ -57,7 +57,7 @@ pub fn set_windir() {
 pub fn delete_windir() {
   println!("[+] Deleting the windir registry key...");
 
-  let mut handle = HKEY::default();
+  let mut hkey = HKEY::default();
 
   let subkey = CString::new("Environment").unwrap();
 
@@ -68,7 +68,7 @@ pub fn delete_windir() {
         PSTR(subkey.as_ptr() as _),
         0,
         KEY_WRITE,
-        &mut handle,
+        &mut hkey,
       )
     };
 
@@ -84,10 +84,10 @@ pub fn delete_windir() {
   let value_name = PSTR(value_name.as_ptr() as *mut _);
 
   {
-    let res = unsafe { RegDeleteValueA(handle, value_name) };
+    let res = unsafe { RegDeleteValueA(hkey, value_name) };
 
     if res != 0 {
-      unsafe { RegCloseKey(handle) };
+      unsafe { RegCloseKey(hkey) };
 
       panic!(
         "Error calling RegDeleteValueA: {:#?}",
@@ -97,7 +97,7 @@ pub fn delete_windir() {
   }
 
   {
-    let res = unsafe { RegCloseKey(handle) };
+    let res = unsafe { RegCloseKey(hkey) };
 
     if res != 0 {
       panic!(
