@@ -9,9 +9,7 @@ use windows::Win32::{
 pub fn is_elevated() -> bool {
   let mut handle = HANDLE::default();
 
-  if unsafe {
-    OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, ptr::addr_of_mut!(handle)).as_bool()
-  } {
+  if unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut handle).as_bool() } {
     let mut elevation = TOKEN_ELEVATION::default();
     let mut ret_size = std::mem::size_of::<TOKEN_ELEVATION>() as u32;
     let elevated = if unsafe {

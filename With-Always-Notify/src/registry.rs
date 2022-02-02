@@ -1,4 +1,4 @@
-use std::{env::current_exe, ffi::CString, ptr};
+use std::{env::current_exe, ffi::CString};
 use windows::Win32::{
   Foundation::PSTR,
   System::Registry::{
@@ -68,7 +68,7 @@ pub fn delete_windir() {
         PSTR(subkey.as_ptr() as _),
         0,
         KEY_WRITE,
-        ptr::addr_of_mut!(handle),
+        &mut handle,
       )
     };
 

