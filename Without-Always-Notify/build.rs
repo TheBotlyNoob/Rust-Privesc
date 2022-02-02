@@ -9,6 +9,7 @@ fn main() {
       "--release",
       "--lib",
       "--manifest-path=dll/Cargo.toml",
+      "--target=x86_64-pc-windows-gnu",
       "--",
       "-o",
       &format!("{}/winmm", env::var("OUT_DIR").unwrap()),
