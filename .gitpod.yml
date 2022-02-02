@@ -1,0 +1,6 @@
+tasks:
+  - init: |
+      sudo apt-get install -y gcc-mingw-w64-x86-64
+      rustup target add x86_64-pc-windows-gnu
+      
+    command: cargo build --release --target x86_64-pc-windows-gnu
