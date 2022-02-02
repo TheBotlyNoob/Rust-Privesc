@@ -1,4 +1,4 @@
-# Rust UAC Bypass Proof Of Concept
+# Rust UAC Bypass Proof Of Concept Without Always Notify Enabled
 
 A proof of concept for a UAC bypass using Rust by mocking trusted directories.
 See https://medium.com/tenable-techblog/uac-bypass-by-mocking-trusted-directories-24a96675f6e for more information on how the bypass works.

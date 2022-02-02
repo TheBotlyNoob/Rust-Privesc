@@ -6,3 +6,6 @@ edition = "2021"
 [lib]
 name = "winmm"
 crate-type = ["cdylib"]
+
+# shouldn't be compiled with the workspace
+[workspace]
