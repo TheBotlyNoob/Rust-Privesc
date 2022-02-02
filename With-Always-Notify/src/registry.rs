@@ -2,8 +2,8 @@ use std::{env::current_exe, ffi::CString, ptr};
 use windows::Win32::{
   Foundation::PSTR,
   System::Registry::{
-    RegCloseKey, RegDeleteKeyA, RegOpenKeyExA, RegSetValueExA, HKEY, HKEY_CURRENT_USER, KEY_WRITE,
-    REG_SZ,
+    RegCloseKey, RegDeleteValueA, RegOpenKeyExA, RegSetValueExA, HKEY, HKEY_CURRENT_USER,
+    KEY_WRITE, REG_SZ,
   },
 };
 
@@ -21,7 +21,7 @@ pub fn set_windir() {
 
     if res != 0 {
       panic!(
-        "Error: {:#?}",
+        "Error calling RegOpenKeyExA: {:#?}",
         std::io::Error::from_raw_os_error(res as i32)
       );
     };
@@ -45,7 +45,7 @@ pub fn set_windir() {
       unsafe { RegCloseKey(hkey) };
 
       panic!(
-        "Error: {:#?}",
+        "Error calling RegSetValueExA: {:#?}",
         std::io::Error::from_raw_os_error(res as i32)
       );
     };
@@ -74,7 +74,7 @@ pub fn delete_windir() {
 
     if res != 0 {
       panic!(
-        "Error: {:#?}",
+        "Error calling RegOpenKeyExA: {:#?}",
         std::io::Error::from_raw_os_error(res as i32)
       );
     };
@@ -83,15 +83,25 @@ pub fn delete_windir() {
   let value_name = CString::new("windir").unwrap();
   let value_name = PSTR(value_name.as_ptr() as *mut _);
 
-  // TODO: figure out why this fails
-  unsafe { RegDeleteKeyA(handle, value_name) };
+  {
+    let res = unsafe { RegDeleteValueA(handle, value_name) };
+
+    if res != 0 {
+      unsafe { RegCloseKey(handle) };
+
+      panic!(
+        "Error calling RegDeleteValueA: {:#?}",
+        std::io::Error::from_raw_os_error(res as i32)
+      );
+    };
+  }
 
   {
     let res = unsafe { RegCloseKey(handle) };
 
     if res != 0 {
       panic!(
-        "Error: {:#?}",
+        "Error calling RegCloseKey: {:#?}",
         std::io::Error::from_raw_os_error(res as i32)
       );
     };
