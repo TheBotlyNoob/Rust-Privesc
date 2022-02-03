@@ -10,29 +10,55 @@ pub use windows::Win32::System::Registry::{
   HKEY_CLASSES_ROOT, HKEY_CURRENT_CONFIG, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_USERS,
 };
 
-pub fn set_value<T: AsRef<Path>>(root: HKEY, value_path: &T) {
+#[derive(Debug)]
+struct StringError(String);
+
+impl std::fmt::Display for StringError {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    write!(f, "{}", self.0)
+  }
+}
+
+impl std::error::Error for StringError {}
+
+pub fn set_value<T: AsRef<Path>, S: AsRef<str>>(
+  root: HKEY,
+  value_path: &T,
+  value: &S,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+  let value = value.as_ref();
   let value_path = value_path.as_ref();
 
-  println!("[+] Setting the {} registry key...");
+  println!("[+] Setting the {} registry value...", value_path.display());
 
   let mut hkey = HKEY::default();
-  let value_name = CString::new("windir").unwrap();
-  let value_name = PSTR(value_name.as_ptr() as _);
-  let subkey = CString::new("Environment").unwrap();
+
+  let subkey = CString::new(
+    value_path
+      .parent()
+      .unwrap()
+      .file_name()
+      .unwrap()
+      .to_str()
+      .unwrap(),
+  )?;
   let subkey = PSTR(subkey.as_ptr() as _);
+
+  let value_name = CString::new(value_path.file_name().unwrap().to_str().unwrap())?;
+  let value_name = PSTR(value_name.as_ptr() as _);
 
   {
     let res = unsafe { RegOpenKeyExA(root, subkey, 0, KEY_WRITE, &mut hkey) };
 
     if res != 0 {
-      panic!(
+      return Err(Box::new(StringError(format!(
         "Error calling RegOpenKeyExA: {:#?}",
         std::io::Error::from_raw_os_error(res as i32)
-      );
+      ))));
     };
   }
 
-  let current_exe = format!("\"{}\"", current_exe().unwrap().to_string_lossy());
+  let current_exe = format!("\"{}\"", current_exe()?.to_string_lossy());
 
   {
     let res = unsafe {
@@ -42,51 +68,60 @@ pub fn set_value<T: AsRef<Path>>(root: HKEY, value_path: &T) {
         0,
         REG_SZ,
         current_exe.as_ptr(),
-        current_exe.len() as u32,
+        value.len() as u32,
       )
     };
 
     if res != 0 {
       unsafe { RegCloseKey(hkey) };
 
-      panic!(
+      return Err(Box::new(StringError(format!(
         "Error calling RegSetValueExA: {:#?}",
-        std::io::Error::from_raw_os_error(res as i32)
-      );
+        std::io::Error::from_raw_os_error(res as i32),
+      ))));
     };
 
     unsafe { RegCloseKey(hkey) };
   }
+
+  Ok(())
 }
 
-pub fn delete_windir() {
-  println!("[+] Deleting the windir registry key...");
+pub fn delete_value<T: AsRef<Path>>(
+  root: HKEY,
+  value_path: &T,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+  let value_path = value_path.as_ref();
+
+  println!("[+] Deleting the {} registry key...", value_path.display());
 
   let mut hkey = HKEY::default();
 
-  let subkey = CString::new("Environment").unwrap();
+  let subkey = CString::new(
+    value_path
+      .parent()
+      .unwrap()
+      .file_name()
+      .unwrap()
+      .to_str()
+      .unwrap(),
+  )
+  .unwrap();
+  let subkey = PSTR(subkey.as_ptr() as _);
+
+  let value_name = CString::new(value_path.file_name().unwrap().to_str().unwrap())?;
+  let value_name = PSTR(value_name.as_ptr() as _);
 
   {
-    let res = unsafe {
-      RegOpenKeyExA(
-        HKEY_CURRENT_USER,
-        PSTR(subkey.as_ptr() as _),
-        0,
-        KEY_WRITE,
-        &mut hkey,
-      )
-    };
+    let res = unsafe { RegOpenKeyExA(root, subkey, 0, KEY_WRITE, &mut hkey) };
 
     if res != 0 {
-      panic!(
+      return Err(Box::new(StringError(format!(
         "Error calling RegOpenKeyExA: {:#?}",
         std::io::Error::from_raw_os_error(res as i32)
-      );
+      ))));
     };
   }
-
-  let value_name = CString::new("windir").unwrap();
-  let value_name = PSTR(value_name.as_ptr() as *mut _);
 
   {
     let res = unsafe { RegDeleteValueA(hkey, value_name) };
@@ -111,4 +146,6 @@ pub fn delete_windir() {
       );
     };
   }
+
+  Ok(())
 }
