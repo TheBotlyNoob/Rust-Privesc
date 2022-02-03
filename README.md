@@ -1,3 +1,7 @@
-# UAC Bypass POCs In Rust
+# POCs built in Rust
 
-Both execute `cmd.exe` as a POC, but, you could do anything with admin privileges.
+## UAC Bypasses
+
+- [mock-trusted-directories](./uac-bypasses/mock-trusted-directories)
+
+All of these POCs execute `cmd.exe`

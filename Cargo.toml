@@ -1,2 +1,6 @@
 [workspace]
-members = ["Without-Always-Notify", "With-Always-Notify"]
+members = [
+  "uac-bypasses/windir-with-silentcleanup-task",
+  "uac-bypasses/mock-trusted-directories",
+  "common",
+]
