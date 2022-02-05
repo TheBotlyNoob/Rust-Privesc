@@ -1,4 +1,4 @@
-use std::{env::current_exe, ffi::CString, path::Path};
+use std::{ffi::CString, path::Path};
 use windows::Win32::{
   Foundation::PSTR,
   System::Registry::{
@@ -58,8 +58,6 @@ pub fn set_value<T: AsRef<Path>, S: AsRef<str>>(
     };
   }
 
-  let current_exe = format!("\"{}\"", current_exe()?.to_string_lossy());
-
   {
     let res = unsafe {
       RegSetValueExA(
@@ -67,7 +65,7 @@ pub fn set_value<T: AsRef<Path>, S: AsRef<str>>(
         value_name,
         0,
         REG_SZ,
-        current_exe.as_ptr(),
+        value.as_ptr(),
         value.len() as u32,
       )
     };
