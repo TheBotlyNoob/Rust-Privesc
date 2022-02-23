@@ -21,10 +21,10 @@ impl std::fmt::Display for StringError {
 
 impl std::error::Error for StringError {}
 
-pub fn set_value<T: AsRef<Path>, S: AsRef<str>>(
+pub fn set_value(
   root: HKEY,
-  value_path: &T,
-  value: &S,
+  value_path: impl AsRef<Path>,
+  value: impl AsRef<str>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
   let value = value.as_ref();
   let value_path = value_path.as_ref();

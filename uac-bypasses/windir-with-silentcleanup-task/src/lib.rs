@@ -12,7 +12,8 @@ pub fn elevate(cb: fn()) {
     .unwrap();
 
     // Run the SilentCleanup task
-    common::scheduled_tasks::run_task(&r"\Microsoft\Windows\DiskCleanup\SilentCleanup").unwrap();
+    common::scheduled_tasks::run_task(r"\Microsoft\Windows\DiskCleanup\SilentCleanup", None)
+      .unwrap();
 
     // Delete the "windir" registry key
     common::registry::delete_value(common::registry::HKEY_CURRENT_USER, value_path).unwrap();
