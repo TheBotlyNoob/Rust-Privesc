@@ -1,4 +1,4 @@
-pub fn elevate(cb: fn()) {
+pub fn elevate(cb: fn()) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Check the elevation
     if !common::is_elevated() {
         let value_path = &r"Environment\windir";
@@ -16,8 +16,10 @@ pub fn elevate(cb: fn()) {
             .unwrap();
 
         // Delete the "windir" registry key
-        common::registry::delete_value(common::registry::HKEY_CURRENT_USER, value_path).unwrap();
+        common::registry::delete_value(common::registry::HKEY_CURRENT_USER, value_path)?;
     } else {
         cb();
     }
+
+    Ok(())
 }

@@ -1,4 +1,3 @@
-use std::ptr;
 use windows::Win32::{
     Foundation::{CloseHandle, HANDLE},
     Security::{GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY},
@@ -16,7 +15,7 @@ pub fn is_elevated() -> bool {
             GetTokenInformation(
                 handle,
                 TokenElevation,
-                ptr::addr_of_mut!(elevation) as _,
+                &mut elevation as *mut _ as *mut _,
                 ret_size,
                 &mut ret_size,
             )

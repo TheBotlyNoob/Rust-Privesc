@@ -1,4 +1,4 @@
-use std::{ffi::OsString, os::windows::ffi::OsStringExt, path::Path, ptr};
+use std::{ffi::OsString, os::windows::prelude::OsStrExt, path::Path, ptr};
 use windows::{
     core::PWSTR,
     Win32::{
@@ -24,8 +24,7 @@ pub fn run_task(
 
     unsafe {
         let task_service =
-            CoCreateInstance::<_, ITaskService>(&TaskScheduler, None, CLSCTX_INPROC_SERVER)
-                .unwrap();
+            CoCreateInstance::<_, ITaskService>(&TaskScheduler, None, CLSCTX_INPROC_SERVER)?;
 
         task_service.Connect(None, None, None, None)?;
 
@@ -34,22 +33,27 @@ pub fn run_task(
             .GetTask(BSTR::from(task.file_name().unwrap().to_str().unwrap()))?;
 
         let variant = if let Some(params) = params.into() {
-            let mut params = params
+            let params = params
                 .into_iter()
-                .map(|param| PWSTR(OsString::from(param).))
-                .collect::<Vec<PWSTR>>();
+                .map(|param| {
+                    PWSTR(
+                        OsString::from(&param)
+                            .encode_wide()
+                            .collect::<Vec<_>>()
+                            .as_mut_ptr(),
+                    )
+                })
+                .collect::<Vec<_>>();
 
-            let pwstr = PWSTR(params.as_mut_ptr() as _);
-            Some(InitVariantFromStringArray(&[params])?)
+            Some(InitVariantFromStringArray(&params)?)
         } else {
             None
         };
 
-        task.RunEx(variant.clone(), TASK_RUN_IGNORE_CONSTRAINTS, 0, None)
-            .unwrap();
+        task.RunEx(variant.clone(), TASK_RUN_IGNORE_CONSTRAINTS.0, 0, None)?;
 
         if let Some(mut variant) = variant {
-            VariantClear(ptr::addr_of_mut!(variant))?;
+            VariantClear(&mut variant)?;
         }
     }
 

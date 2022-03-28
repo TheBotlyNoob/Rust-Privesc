@@ -1,6 +1,6 @@
 use std::{ffi::CString, path::Path};
 use windows::{
-    core::PSTR,
+    core::PCSTR,
     Win32::System::Registry::{
         RegCloseKey, RegDeleteValueA, RegOpenKeyExA, RegSetValueExA, HKEY, KEY_WRITE, REG_SZ,
     },
@@ -42,10 +42,10 @@ pub fn set_value(
             .to_str()
             .unwrap(),
     )?;
-    // let subkey = PSTR(subkey.as_ptr() as _);
+    let subkey = PCSTR(subkey.as_ptr() as _);
 
     let value_name = CString::new(value_path.file_name().unwrap().to_str().unwrap())?;
-    let value_name = PSTR(value_name.as_ptr() as _);
+    let value_name = PCSTR(value_name.as_ptr() as _);
 
     {
         let res = unsafe { RegOpenKeyExA(root, subkey, 0, KEY_WRITE, &mut hkey) };
@@ -105,18 +105,18 @@ pub fn delete_value<T: AsRef<Path>>(
             .unwrap(),
     )
     .unwrap();
-    let subkey = PSTR(subkey.as_ptr() as _);
+    let subkey = PCSTR(subkey.as_ptr() as _);
 
     let value_name = CString::new(value_path.file_name().unwrap().to_str().unwrap())?;
-    let value_name = PSTR(value_name.as_ptr() as _);
+    let value_name = PCSTR(value_name.as_ptr() as _);
 
     {
         let res = unsafe { RegOpenKeyExA(root, subkey, 0, KEY_WRITE, &mut hkey) };
 
-        if res != 0 {
+        if res.is_err() {
             return Err(Box::new(StringError(format!(
                 "Error calling RegOpenKeyExA: {:#?}",
-                std::io::Error::from_raw_os_error(res as i32)
+                std::io::Error::from_raw_os_error(res.0 as i32)
             ))));
         };
     }
@@ -124,12 +124,12 @@ pub fn delete_value<T: AsRef<Path>>(
     {
         let res = unsafe { RegDeleteValueA(hkey, value_name) };
 
-        if res != 0 {
+        if res.is_err() {
             unsafe { RegCloseKey(hkey) };
 
             panic!(
                 "Error calling RegDeleteValueA: {:#?}",
-                std::io::Error::from_raw_os_error(res as i32)
+                std::io::Error::from_raw_os_error(res.0 as i32)
             );
         };
     }
@@ -137,10 +137,10 @@ pub fn delete_value<T: AsRef<Path>>(
     {
         let res = unsafe { RegCloseKey(hkey) };
 
-        if res != 0 {
+        if res.is_err() {
             panic!(
                 "Error calling RegCloseKey: {:#?}",
-                std::io::Error::from_raw_os_error(res as i32)
+                std::io::Error::from_raw_os_error(res.0 as i32)
             );
         };
     }
