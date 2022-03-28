@@ -1,12 +1,15 @@
-use std::{ffi::CString, path::Path, ptr};
-use windows::Win32::{
-    Foundation::{BSTR, PWSTR},
-    System::{
-        Com::{CoCreateInstance, CoInitialize, CoUninitialize, CLSCTX_INPROC_SERVER},
-        Ole::VariantClear,
-        TaskScheduler::{ITaskService, TaskScheduler, TASK_RUN_IGNORE_CONSTRAINTS},
+use std::{ffi::OsString, os::windows::ffi::OsStringExt, path::Path, ptr};
+use windows::{
+    core::PWSTR,
+    Win32::{
+        Foundation::BSTR,
+        System::{
+            Com::{CoCreateInstance, CoInitialize, CoUninitialize, CLSCTX_INPROC_SERVER},
+            Ole::VariantClear,
+            TaskScheduler::{ITaskService, TaskScheduler, TASK_RUN_IGNORE_CONSTRAINTS},
+        },
+        UI::Shell::PropertiesSystem::InitVariantFromStringArray,
     },
-    UI::Shell::PropertiesSystem::InitVariantFromStringArray,
 };
 
 pub fn run_task(
@@ -33,14 +36,11 @@ pub fn run_task(
         let variant = if let Some(params) = params.into() {
             let mut params = params
                 .into_iter()
-                .map(|param| CString::new(param).unwrap())
-                .collect::<Vec<CString>>();
+                .map(|param| PWSTR(OsString::from(param).))
+                .collect::<Vec<PWSTR>>();
 
             let pwstr = PWSTR(params.as_mut_ptr() as _);
-            Some(InitVariantFromStringArray(
-                ptr::addr_of!(pwstr),
-                params.len() as _,
-            )?)
+            Some(InitVariantFromStringArray(&[params])?)
         } else {
             None
         };

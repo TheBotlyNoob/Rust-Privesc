@@ -1,7 +1,7 @@
 use std::{ffi::CString, path::Path};
-use windows::Win32::{
-    Foundation::PSTR,
-    System::Registry::{
+use windows::{
+    core::PSTR,
+    Win32::System::Registry::{
         RegCloseKey, RegDeleteValueA, RegOpenKeyExA, RegSetValueExA, HKEY, KEY_WRITE, REG_SZ,
     },
 };
@@ -42,7 +42,7 @@ pub fn set_value(
             .to_str()
             .unwrap(),
     )?;
-    let subkey = PSTR(subkey.as_ptr() as _);
+    // let subkey = PSTR(subkey.as_ptr() as _);
 
     let value_name = CString::new(value_path.file_name().unwrap().to_str().unwrap())?;
     let value_name = PSTR(value_name.as_ptr() as _);
@@ -50,10 +50,10 @@ pub fn set_value(
     {
         let res = unsafe { RegOpenKeyExA(root, subkey, 0, KEY_WRITE, &mut hkey) };
 
-        if res != 0 {
+        if res.is_err() {
             return Err(Box::new(StringError(format!(
                 "Error calling RegOpenKeyExA: {:#?}",
-                std::io::Error::from_raw_os_error(res as i32)
+                std::io::Error::from_raw_os_error(res.0 as i32)
             ))));
         };
     }
@@ -70,12 +70,12 @@ pub fn set_value(
             )
         };
 
-        if res != 0 {
+        if res.is_err() {
             unsafe { RegCloseKey(hkey) };
 
             return Err(Box::new(StringError(format!(
                 "Error calling RegSetValueExA: {:#?}",
-                std::io::Error::from_raw_os_error(res as i32),
+                std::io::Error::from_raw_os_error(res.0 as i32),
             ))));
         };
 
