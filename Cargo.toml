@@ -2,6 +2,5 @@
 members = [
     "uac-bypasses/windir-with-silentcleanup-task",
     "uac-bypasses/mock-trusted-directories",
-    "privilege-escalation/virtualdisk-with-custom-os",
     "common",
 ]
