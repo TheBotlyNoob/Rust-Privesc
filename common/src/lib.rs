@@ -4,3 +4,5 @@ pub use is_elevated::is_elevated;
 pub mod scheduled_tasks;
 
 pub mod registry;
+
+pub mod virtual_disk;
