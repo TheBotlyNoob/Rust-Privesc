@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "uac-bypasses/windir-with-silentcleanup-task",
-    "uac-bypasses/mock-trusted-directories",
-    "common",
+  "uac-bypasses/windir-with-silentcleanup-task",
+  "uac-bypasses/mock-trusted-directories",
+  "common",
 ]

@@ -85,9 +85,9 @@ pub fn set_value(
     Ok(())
 }
 
-pub fn delete_value<T: AsRef<Path>>(
+pub fn delete_value(
     root: HKEY,
-    value_path: &T,
+    value_path: impl AsRef<Path>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let value_path = value_path.as_ref();
 

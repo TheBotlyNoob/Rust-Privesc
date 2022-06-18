@@ -1,0 +1,7 @@
+[toolchain]
+# if this doesn't work, try looking
+# in https://rust-lang.github.io/rustup-components-history/
+# and find one that contains all these components
+channel = "nightly"
+components = ["cargo", "rustfmt", "clippy", "rust-analysis", "rust-std"]
+profile = "minimal"

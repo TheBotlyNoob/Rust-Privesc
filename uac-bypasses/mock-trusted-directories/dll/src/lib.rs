@@ -7,7 +7,7 @@ pub extern "C" fn DllMain() {
     if !HAS_RUN.swap(true, Ordering::Relaxed) {
         // do whatever you want here with admin privileges.
         // in this case, I just spawn a command prompt.
-        std::process::Command::new("cmd.exe").spawn().unwrap();
+        let _ = std::process::Command::new("cmd.exe").spawn();
     }
 }
 
